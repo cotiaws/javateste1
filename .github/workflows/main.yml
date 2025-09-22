@@ -29,13 +29,13 @@ jobs:
     - name: Publicar relatório Cucumber (HTML)
       uses: actions/upload-artifact@v4
       with:
-        name: cucumber-report
-        path: target/cucumber-report.html
+        name: cucumber-report-html
+        path: target/cucumber-reports/cucumber-report.html
 
-    - name: Publicar relatório Cucumber (JSON + JUnit)
+    - name: Publicar relatórios Cucumber (JSON + XML)
       uses: actions/upload-artifact@v4
       with:
-        name: cucumber-report-json-xml
+        name: cucumber-reports
         path: |
-          target/cucumber-report.json
-          target/cucumber-report.xml
+          target/cucumber-reports/cucumber-report.json
+          target/cucumber-reports/cucumber-report.xml
