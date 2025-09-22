@@ -1,4 +1,4 @@
-name: Java CI with Maven + Cucumber
+name: Java CI with Maven + Cucumber + Selenium
 
 on:
   push:
@@ -20,22 +20,46 @@ jobs:
         distribution: 'temurin'
         java-version: '17'
 
+    # Instala Google Chrome
+    - name: Instalar Google Chrome
+      run: |
+        sudo apt-get update
+        sudo apt-get install -y wget gnupg unzip
+        wget -q -O - https://dl.google.com/linux/linux_signing_key.pub | sudo apt-key add -
+        sudo sh -c 'echo "deb [arch=amd64] http://dl.google.com/linux/chrome/deb/ stable main" >> /etc/apt/sources.list.d/google-chrome.list'
+        sudo apt-get update
+        sudo apt-get install -y google-chrome-stable
+
+    # Instala ChromeDriver compatível com a versão do Chrome
+    - name: Instalar ChromeDriver
+      run: |
+        CHROME_VERSION=$(google-chrome --version | awk '{print $3}')
+        CHROMEDRIVER_VERSION=$(curl -s "https://googlechromelabs.github.io/chrome-for-testing/LATEST_RELEASE_${CHROME_VERSION%%.*}")
+        wget https://edgedl.me.gvt1.com/edgedl/chrome/chrome-for-testing/${CHROMEDRIVER_VERSION}/linux64/chromedriver-linux64.zip
+        unzip chromedriver-linux64.zip
+        sudo mv chromedriver-linux64/chromedriver /usr/local/bin/
+        rm -rf chromedriver-linux64 chromedriver-linux64.zip
+
     - name: Compilar projeto
       run: mvn -B clean install
 
-    - name: Executar testes (Cucumber + JUnit)
+    - name: Executar testes (Cucumber + Selenium)
       run: mvn test
 
-    - name: Publicar relatório Cucumber (HTML)
-      uses: actions/upload-artifact@v4
-      with:
-        name: cucumber-report-html
-        path: target/cucumber-reports/cucumber-report.html
-
-    - name: Publicar relatórios Cucumber (JSON + XML)
+    # Publica relatórios Cucumber (HTML, JSON, XML)
+    - name: Publicar relatórios Cucumber
+      if: always()
       uses: actions/upload-artifact@v4
       with:
         name: cucumber-reports
-        path: |
-          target/cucumber-reports/cucumber-report.json
-          target/cucumber-reports/cucumber-report.xml
+        path: target/cucumber-reports/**
+        if-no-files-found: ignore
+
+    # Publica relatórios Surefire (JUnit padrão Maven)
+    - name: Publicar relatórios Surefire
+      if: always()
+      uses: actions/upload-artifact@v4
+      with:
+        name: surefire-reports
+        path: target/surefire-reports/**
+        if-no-files-found: ignore

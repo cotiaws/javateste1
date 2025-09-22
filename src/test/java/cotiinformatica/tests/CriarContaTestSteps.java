@@ -7,6 +7,7 @@ import java.time.Duration;
 import org.openqa.selenium.By;
 import org.openqa.selenium.WebElement;
 import org.openqa.selenium.chrome.ChromeDriver;
+import org.openqa.selenium.chrome.ChromeOptions;
 import org.openqa.selenium.support.ui.ExpectedConditions;
 import org.openqa.selenium.support.ui.Select;
 import org.openqa.selenium.support.ui.WebDriverWait;
@@ -27,8 +28,14 @@ public class CriarContaTestSteps {
 	@Dado("Eu estou na página inicial da loja virtual")
 	public void eu_estou_na_página_inicial_da_loja_virtual() {
 		
+		ChromeOptions options = new ChromeOptions();
+        options.addArguments("--headless"); // necessário em CI
+        options.addArguments("--no-sandbox"); // necessário em GitHub Actions
+        options.addArguments("--disable-dev-shm-usage"); // necessário em CI/Linux
+        options.addArguments("--remote-allow-origins=*");
+		
 		//abrir o navegador
-		driver = new ChromeDriver();
+		driver = new ChromeDriver(options);
 		
 		//definir a configuração do wait (aguardar)
 		wait = new WebDriverWait(driver, Duration.ofSeconds(10));
